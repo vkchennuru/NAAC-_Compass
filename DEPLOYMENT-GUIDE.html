@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NAAC Compass — Deployment Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--navy:#0a1628;--teal:#00b4a6;--teal2:#00d4c4;--gold:#f5a623;--gold2:#ffd166;--green:#06d6a0;--white:#f0f4ff;--muted:#8892b0;--border:#1e3a5f;--card:#112240;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overflow-x:hidden;}
+  .bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,180,166,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,166,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+  .glow{position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,166,0.1) 0%,transparent 70%);top:-200px;right:-100px;z-index:0;pointer-events:none;}
+  .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:40px 24px 80px;}
+
+  /* Hero */
+  .hero{text-align:center;padding:48px 0 56px;}
+  .hero-icon{font-size:64px;display:block;margin-bottom:12px;animation:spin 20s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,7vw,72px);font-weight:900;background:linear-gradient(135deg,var(--teal2),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:10px;}
+  .hero p{font-size:18px;color:#a8bcd8;max-width:520px;margin:0 auto 24px;line-height:1.7;}
+  .badge-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:0;}
+  .badge{background:rgba(0,180,166,0.12);border:1px solid rgba(0,180,166,0.3);color:var(--teal2);padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;font-family:'DM Mono',monospace;}
+
+  /* Section heading */
+  .sec-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin:48px 0 24px;display:flex;align-items:center;gap:12px;}
+  .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* Step cards */
+  .step{background:rgba(17,34,64,0.85);border:1px solid var(--border);border-radius:18px;padding:28px 28px 28px 24px;margin-bottom:18px;display:flex;gap:20px;align-items:flex-start;backdrop-filter:blur(10px);transition:border-color 0.2s;}
+  .step:hover{border-color:rgba(0,180,166,0.4);}
+  .step-num{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));color:var(--navy);font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-body{flex:1;}
+  .step-title{font-size:19px;font-weight:700;color:#eef4ff;margin-bottom:8px;}
+  .step-desc{font-size:14px;color:#a8bcd8;line-height:1.75;margin-bottom:12px;}
+  .step-action{background:rgba(0,180,166,0.08);border:1px solid rgba(0,180,166,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:#c8e8e4;line-height:1.7;}
+  .step-action strong{color:var(--teal2);}
+  .code{display:block;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:13px;color:var(--teal2);margin:10px 0;overflow-x:auto;white-space:pre;}
+  .link-btn{display:inline-block;background:rgba(0,180,166,0.12);border:1px solid rgba(0,180,166,0.3);color:var(--teal2);padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;margin-top:8px;}
+  .link-btn:hover{background:rgba(0,180,166,0.22);}
+
+  /* Feature grid */
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:32px;}
+  .feat-card{background:rgba(17,34,64,0.85);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(10px);}
+  .feat-icon{font-size:28px;margin-bottom:8px;}
+  .feat-title{font-size:15px;font-weight:700;color:#eef4ff;margin-bottom:4px;}
+  .feat-desc{font-size:12px;color:#8892b0;line-height:1.6;}
+
+  /* Usage steps */
+  .use-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+  .use-item{background:rgba(17,34,64,0.85);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;backdrop-filter:blur(10px);}
+  .use-num{background:rgba(0,180,166,0.15);border:1px solid rgba(0,180,166,0.3);color:var(--teal2);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace;}
+  .use-text{font-size:14px;color:#c8d8f0;line-height:1.6;}
+  .use-text strong{color:#eef4ff;}
+
+  /* Info boxes */
+  .info-box{border-radius:14px;padding:20px 24px;margin-bottom:18px;}
+  .info-box.green{background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.2);}
+  .info-box.gold{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);}
+  .info-box.blue{background:rgba(0,180,166,0.07);border:1px solid rgba(0,180,166,0.2);}
+  .info-box h3{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .info-box.green h3{color:var(--green);}
+  .info-box.gold h3{color:var(--gold2);}
+  .info-box.blue h3{color:var(--teal2);}
+  .info-box p,.info-box li{font-size:13px;color:#a8bcd8;line-height:1.75;}
+  .info-box ul{padding-left:16px;}
+
+  /* Footer */
+  footer{border-top:1px solid var(--border);margin-top:60px;padding-top:24px;text-align:center;font-size:12px;color:#4a5a78;font-family:'DM Mono',monospace;line-height:1.8;}
+  footer strong{color:var(--teal2);}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="glow"></div>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="hero-icon">🧭</span>
+    <h1>NAAC Compass</h1>
+    <p>Complete deployment guide — go live in under 10 minutes, free forever.</p>
+    <div class="badge-row">
+      <span class="badge">Zero Cost</span>
+      <span class="badge">No Server</span>
+      <span class="badge">5 Minutes Setup</span>
+      <span class="badge">Free Forever</span>
+    </div>
+  </div>
+
+  <!-- WHAT YOU HAVE -->
+  <div class="sec-title">📦 What You Have</div>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">📄</div><div class="feat-title">index.html</div><div class="feat-desc">The complete NAAC Compass app — all 5 phases in one single file. Upload this to GitHub.</div></div>
+    <div class="feat-card"><div class="feat-icon">📖</div><div class="feat-title">README.md</div><div class="feat-desc">Description file for your GitHub repository. Displays nicely on the repo page.</div></div>
+    <div class="feat-card"><div class="feat-icon">📋</div><div class="feat-title">DEPLOYMENT-GUIDE.html</div><div class="feat-desc">This guide. Open in any browser. Print or share as needed.</div></div>
+  </div>
+
+  <!-- DEPLOY STEPS -->
+  <div class="sec-title">🚀 Deploy in 5 Steps</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Create a Free GitHub Account</div>
+      <div class="step-desc">GitHub is a free platform for hosting websites and code. You only need to sign up once — it is completely free and takes 2 minutes.</div>
+      <div class="step-action">
+        Go to <strong>github.com/signup</strong> → Enter your email, create a password, choose a username.<br>
+        💡 <strong>Tip for username:</strong> Use something like <em>skr-college-kadapa</em> or <em>dr-krishnaveni</em> — your URL will use this name.
+      </div>
+      <a class="link-btn" href="https://github.com/signup" target="_blank">→ Open GitHub Sign Up ↗</a>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Create a New Repository Named "naac-compass"</div>
+      <div class="step-desc">A repository is like a folder on GitHub where your files live. Once created, it becomes your website's home.</div>
+      <div class="step-action">
+        After logging in to GitHub:<br>
+        1. Click the <strong>+</strong> button (top right corner) → <strong>New repository</strong><br>
+        2. Repository name: <strong>naac-compass</strong><br>
+        3. Set visibility to <strong>Public</strong> (required for free hosting)<br>
+        4. Tick the checkbox: <strong>✅ Add a README file</strong><br>
+        5. Click <strong>Create repository</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">Upload Your Files</div>
+      <div class="step-desc">Now upload the 3 files from your computer into the GitHub repository.</div>
+      <div class="step-action">
+        Inside your new repository page:<br>
+        1. Click <strong>Add file</strong> → <strong>Upload files</strong><br>
+        2. Drag these 3 files into the upload box:<br>
+        &nbsp;&nbsp;&nbsp;• <strong>index.html</strong> ← most important<br>
+        &nbsp;&nbsp;&nbsp;• <strong>README.md</strong><br>
+        &nbsp;&nbsp;&nbsp;• <strong>DEPLOYMENT-GUIDE.html</strong> (optional)<br>
+        3. Scroll down → click <strong>Commit changes</strong><br>
+        ✅ Your files are now on GitHub!
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">Enable GitHub Pages (Free Hosting)</div>
+      <div class="step-desc">GitHub Pages turns your repository into a live website — completely free, no credit card, no expiry.</div>
+      <div class="step-action">
+        In your repository:<br>
+        1. Click <strong>Settings</strong> (top menu bar)<br>
+        2. In the left sidebar → click <strong>Pages</strong><br>
+        3. Under <strong>Branch</strong> → select <strong>main</strong><br>
+        4. Folder: leave as <strong>/ (root)</strong><br>
+        5. Click <strong>Save</strong><br>
+        6. ⏳ Wait 1–2 minutes…<br>
+        7. Refresh the page → you will see a green banner: <strong>"Your site is live at…"</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <div class="step-title">Your Live URL — Share It!</div>
+      <div class="step-desc">Your NAAC Compass is now live on the internet, accessible by anyone with the link, on any device.</div>
+      <div class="step-action">
+        Your permanent URL will be:
+        <span class="code">https://YOUR-USERNAME.github.io/naac-compass/</span>
+        Replace <strong>YOUR-USERNAME</strong> with your actual GitHub username.<br><br>
+        📱 Share this URL via WhatsApp, email, or on your college website.<br>
+        🔄 To update the tool later: just upload a new <strong>index.html</strong> — the live site updates automatically within minutes.
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO USE -->
+  <div class="sec-title">🖥️ How to Use NAAC Compass</div>
+  <div class="use-list">
+    <div class="use-item"><div class="use-num">1</div><div class="use-text"><strong>Open the URL</strong> in Chrome, Firefox, or any browser on mobile or desktop.</div></div>
+    <div class="use-item"><div class="use-num">2</div><div class="use-text"><strong>Select your role</strong> — IQAC Coordinator, Faculty, Principal, or Admin Staff.</div></div>
+    <div class="use-item"><div class="use-num">3</div><div class="use-text"><strong>Click "Enter NAAC Compass"</strong> to reach your personalised dashboard.</div></div>
+    <div class="use-item"><div class="use-num">4</div><div class="use-text">Click the <strong>🧭 Setup Wizard banner</strong> on your first visit — it asks 7 quick questions and auto-generates tasks for your college.</div></div>
+    <div class="use-item"><div class="use-num">5</div><div class="use-text"><strong>Click any of the 10 attribute cards</strong> to see: what activities to perform, what documents to prepare, and how to report Input/Process/Output.</div></div>
+    <div class="use-item"><div class="use-num">6</div><div class="use-text">Use <strong>📋 Tracker</strong> to add tasks, assign to faculty, set deadlines, and track completion.</div></div>
+    <div class="use-item"><div class="use-num">7</div><div class="use-text">Use <strong>📅 Calendar</strong> to see what NAAC activities must be done each month of the year.</div></div>
+    <div class="use-item"><div class="use-num">8</div><div class="use-text">Use <strong>📝 AQAR</strong> to fill your annual report — click <em>🤖 AI Draft</em> on any field to auto-generate formal NAAC content.</div></div>
+    <div class="use-item"><div class="use-num">9</div><div class="use-text">Use <strong>📁 DVV</strong> to tick off evidence documents and paste Google Drive links — exactly what NAAC verifiers request.</div></div>
+    <div class="use-item"><div class="use-num">10</div><div class="use-text">Use <strong>📋 SSR</strong> to build your Self Study Report summary — click <em>🤖 AI Draft</em> for the executive summary.</div></div>
+    <div class="use-item"><div class="use-num">11</div><div class="use-text">Use <strong>📖 Glossary</strong> to look up any NAAC term in plain English — 40 terms with full forms and definitions.</div></div>
+    <div class="use-item"><div class="use-num">12</div><div class="use-text">Click the <strong>🤖 floating button</strong> on any screen to chat with NAAC Buddy — ask anything in plain language.</div></div>
+    <div class="use-item"><div class="use-num">13</div><div class="use-text">Click <strong>🏛️ College name button</strong> in the topbar to add profiles for multiple colleges — each with its own separate data.</div></div>
+    <div class="use-item"><div class="use-num">14</div><div class="use-text"><strong>All data saves automatically</strong> in your browser. It persists across sessions — no login needed.</div></div>
+    <div class="use-item"><div class="use-num">15</div><div class="use-text">Use <strong>EN / తె toggle</strong> in the topbar to switch between English and Telugu at any time.</div></div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="sec-title">💡 Important Tips</div>
+
+  <div class="info-box green">
+    <h3>✅ Data is saved in your browser</h3>
+    <p>All college data — compliance status, tasks, AQAR content, SSR data, DVV checklist — is stored in your browser's localStorage. It persists across sessions. <strong>Do not use Incognito/Private mode</strong> as data will be lost when you close the tab.</p>
+  </div>
+
+  <div class="info-box gold">
+    <h3>⚠️ AI features need internet</h3>
+    <p>The NAAC Buddy chatbot and AI Draft buttons require an internet connection. All other features (attribute cards, tracker, calendar, glossary, DVV checklist) work without internet after the first load.</p>
+  </div>
+
+  <div class="info-box blue">
+    <h3>🔄 How to update the tool</h3>
+    <ul>
+      <li>Download the new <strong>index.html</strong> file when updates are available</li>
+      <li>Go to your GitHub repository → <strong>Add file → Upload files</strong></li>
+      <li>Upload the new index.html → <strong>Commit changes</strong></li>
+      <li>Your live site updates automatically within 2–5 minutes</li>
+      <li>All saved data in users' browsers is preserved across updates</li>
+    </ul>
+  </div>
+
+  <div class="info-box green">
+    <h3>📱 Share with Other Colleges</h3>
+    <ul>
+      <li>Share the GitHub Pages URL via WhatsApp to IQAC groups</li>
+      <li>Post on your college website as a resource link</li>
+      <li>Share at state-level NAAC workshops and IQAC coordinator meetings</li>
+      <li>Any college can use it — each creates their own profile, data stays separate</li>
+    </ul>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="sec-title">🛠️ Technology Stack</div>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">🌐</div><div class="feat-title">GitHub Pages</div><div class="feat-desc">Free static website hosting. No server needed. Sites never expire. 100GB bandwidth/month free.</div></div>
+    <div class="feat-card"><div class="feat-icon">💾</div><div class="feat-title">Browser localStorage</div><div class="feat-desc">College data saved in the user's own browser. Private, secure, no external database needed.</div></div>
+    <div class="feat-card"><div class="feat-icon">🤖</div><div class="feat-title">Claude AI API</div><div class="feat-desc">Powers NAAC Buddy chatbot and AQAR/SSR AI drafting. Free tier available for basic use.</div></div>
+    <div class="feat-card"><div class="feat-icon">🔤</div><div class="feat-title">Google Fonts</div><div class="feat-desc">Playfair Display + DM Sans + DM Mono — beautiful typography loaded from Google CDN for free.</div></div>
+  </div>
+
+  <!-- COPYRIGHT -->
+  <div class="info-box blue" style="margin-top:32px;text-align:center;">
+    <h3 style="font-size:17px;margin-bottom:6px;">© Dr. C. V. Krishnaveni, Lecturer in Computer Science</h3>
+    <p>SKR & SKR Government College for Women (Autonomous), Kadapa, Andhra Pradesh<br>
+    Licensed under <strong>CC BY 4.0</strong> — Free to use, share, and adapt with attribution.<br>
+    Blog: <a href="https://cvkrishnaveni.blogspot.com" style="color:var(--teal2);">cvkrishnaveni.blogspot.com</a></p>
+  </div>
+
+  <footer>
+    🧭 NAAC Compass &nbsp;|&nbsp; <strong>© Dr. C. V. Krishnaveni</strong>, Lecturer in Computer Science &nbsp;|&nbsp; CC BY 4.0 &nbsp;|&nbsp; Free forever for Indian colleges
+  </footer>
+
+</div>
+</body>
+</html>
